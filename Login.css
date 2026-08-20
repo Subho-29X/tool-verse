@@ -1,0 +1,254 @@
+:root {
+  --sc-blue: #0072ce;
+  --sc-blue-hover: #005bb5;
+  --sc-green: #00a546;
+  --sc-navy-dark: #00122e;
+  --sc-navy-light: #06234d;
+  --sc-text-main: #1e293b;
+  --sc-text-muted: #64748b;
+  --sc-border: #e2e8f0;
+  --sc-bg-input: #f8fafc;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+    Cantarell, sans-serif;
+}
+
+.sc-login-container {
+  display: flex;
+  min-height: 100vh;
+  width: 100vw;
+  background-color: #ffffff;
+}
+
+/* Hero Section */
+.sc-hero-panel {
+  flex: 1.2;
+  position: relative;
+  background-image: url("https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1600&q=80");
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  padding: 80px;
+  color: #ffffff;
+}
+
+.sc-hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 18, 46, 0.94) 0%,
+    rgba(0, 38, 84, 0.82) 100%
+  );
+  z-index: 1;
+}
+
+.sc-hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 520px;
+}
+
+.sc-accent-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 4px;
+  height: 52px;
+  margin-bottom: 24px;
+}
+
+.bar-blue {
+  flex: 1;
+  background-color: var(--sc-blue);
+  border-radius: 2px 2px 0 0;
+}
+
+.bar-green {
+  flex: 1;
+  background-color: var(--sc-green);
+  border-radius: 0 0 2px 2px;
+}
+
+.sc-badge {
+  display: inline-block;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #93c5fd;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.sc-hero-content h1 {
+  font-size: 2.75rem;
+  line-height: 1.2;
+  font-weight: 600;
+  margin-bottom: 20px;
+  letter-spacing: -0.5px;
+}
+
+.sc-hero-content p {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: #cbd5e1;
+  margin-bottom: 40px;
+}
+
+.sc-trust-footer span {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  border-left: 2px solid var(--sc-green);
+  padding-left: 10px;
+}
+
+/* Form Section */
+.sc-form-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background-color: #ffffff;
+}
+
+.sc-form-wrapper {
+  width: 100%;
+  max-width: 420px;
+}
+
+/* Official Logo Styling */
+.sc-brand-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 36px;
+}
+
+.sc-brand-image {
+  height: 48px;
+  width: auto;
+  object-fit: contain;
+}
+
+.sc-brand-title {
+  display: flex;
+  flex-direction: column;
+}
+
+.sc-brand-title h2 {
+  font-size: 1.25rem;
+  line-height: 0.95;
+  font-weight: 700;
+  color: #333d47;
+  letter-spacing: -0.4px;
+}
+
+.sc-welcome-text h3 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--sc-text-main);
+  margin-bottom: 8px;
+}
+
+.sc-welcome-text p {
+  color: var(--sc-text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 32px;
+}
+
+/* Form Controls */
+.sc-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-group label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--sc-text-main);
+}
+
+.input-group input {
+  padding: 14px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--sc-border);
+  background-color: var(--sc-bg-input);
+  font-size: 0.95rem;
+  color: var(--sc-text-main);
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.input-group input:focus {
+  background-color: #ffffff;
+  border-color: var(--sc-blue);
+  box-shadow: 0 0 0 3px rgba(0, 114, 206, 0.15);
+}
+
+.sc-form-options {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.sc-link {
+  color: var(--sc-blue);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.sc-link:hover {
+  text-decoration: underline;
+}
+
+.sc-submit-btn {
+  margin-top: 10px;
+  padding: 14px;
+  background-color: var(--sc-blue);
+  color: #ffffff;
+  border: none;
+  border-radius: 30px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    transform 0.1s ease;
+}
+
+.sc-submit-btn:hover {
+  background-color: var(--sc-blue-hover);
+}
+
+.sc-submit-btn:active {
+  transform: scale(0.99);
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .sc-hero-panel {
+    display: none;
+  }
+  .sc-form-panel {
+    padding: 24px;
+  }
+}
