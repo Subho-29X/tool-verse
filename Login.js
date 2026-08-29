@@ -109,3 +109,82 @@ const Login = () => {
 };
 
 export default Login;
+
+
+. users
+Column	Type	Notes
+user_id	PK, INT/UUID	
+name	VARCHAR	
+email	VARCHAR, UNIQUE	login
+password_hash	VARCHAR	
+role	ENUM('CUSTOMER','MAKER','CHECKER','ADMIN')	drives queue visibility
+created_at	TIMESTAMP	
+is_active	BOOLEAN	
+2. loan_applications
+Column	Type	Notes
+loan_application_id	PK, INT/UUID	internal id
+transaction_ref_no	VARCHAR, UNIQUE	e.g. SCW157SG10A1060519074552 — business identifier, from User Story 2
+customer_id	FK → users.user_id	who submitted
+customer_name	VARCHAR	captured at submission (denormalized snapshot)
+customer_country	VARCHAR	
+address	VARCHAR	
+date_of_birth	DATE	
+loan_amount	DECIMAL	entered by Maker (per mockup)
+currency	VARCHAR(3)	
+status	ENUM('SUBMITTED','IN_MAKER','IN_CHECKER','APPROVED','TP_SYNC_PENDING','TP_CONFIRMED','REJECTED')	overall app state
+current_work_item_id	FK → work_items.work_item_id, NULLABLE	pointer to active step
+tp_system_ref	VARCHAR, NULLABLE	confirmation id once created in TP System
+created_at	TIMESTAMP	
+updated_at	TIMESTAMP	
+3. loan_documents
+Column	Type	Notes
+document_id	PK	
+loan_application_id	FK → loan_applications	
+file_name	VARCHAR	
+file_path / blob_ref	VARCHAR	storage location
+file_type	VARCHAR	pdf/jpg/png etc.
+uploaded_by	FK → users.user_id	
+uploaded_at	TIMESTAMP	
+4. workflow_steps (new — lookup/config table)
+Column	Type	Notes
+step_id	PK	e.g. 1–6
+step_name	VARCHAR	'Loan Form', 'Operations Maker', 'Operations Checker', 'System Approval'
+step_type	ENUM('M','A')	Manual or Auto
+assigned_role	ENUM('CUSTOMER','MAKER','CHECKER', NULL)	NULL for auto/system steps
+next_step_id	FK → workflow_steps.step_id, NULLABLE	drives the handoff chain (User Stories 4 & 6)
+sort_order	INT	
+5. work_items
+Column	Type	Notes
+work_item_id	PK	
+loan_application_id	FK → loan_applications	
+step_id	FK → workflow_steps.step_id	current step (replaces free-text step name)
+assigned_group	ENUM('MAKER','CHECKER','SYSTEM')	which queue it sits in
+assigned_user_id	FK → users.user_id, NULLABLE	who picked it up (NULL = unclaimed, sitting in shared inbox)
+status	ENUM('PENDING','IN_PROGRESS','COMPLETED')	
+picked_at	TIMESTAMP, NULLABLE	
+completed_at	TIMESTAMP, NULLABLE	
+created_at	TIMESTAMP	
+6. workflow_history (audit trail — system-generated, immutable)
+Column	Type	Notes
+history_id	PK	
+loan_application_id	FK → loan_applications	
+work_item_id	FK → work_items	
+from_step_id	FK → workflow_steps, NULLABLE	
+to_step_id	FK → workflow_steps	
+action	VARCHAR	'SUBMITTED','PICKED','COMPLETED','APPROVED','MOVED_TO_TP'
+performed_by	FK → users.user_id, NULLABLE	NULL for system-auto actions
+performed_at	TIMESTAMP	
+7. comments (new — from the mockup's Comments tab)
+Column	Type	Notes
+comment_id	PK	
+work_item_id	FK → work_items	
+user_id	FK → users.user_id	author
+comment_text	TEXT	
+created_at	TIMESTAMP	
+Key relationships to note:
+loan_applications 1—N work_items (one row per step the loan passes through)
+work_items 1—N comments, 1—N workflow_history entries
+workflow_steps is the config table both work_items.step_id and loan_applications status logic reference — this is what lets your workflow engine be data-driven instead of hardcoded if/else per step.
+That's 7 tables total (5 original + comments + workflow_steps). If you want to keep workflow_steps out of MVP scope and just hardcode the 3 states in code, you can drop it and keep work_items.step_name as a plain string — just flag that as a deliberate scope cut, not an oversight.
+
+
