@@ -5,6 +5,30 @@
 </dependency>
 
 
+
+
+package com.axess.training;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/ocr")
+public class OcrController {
+
+    private final OcrService ocrService;
+
+    public OcrController(OcrService ocrService) {
+        this.ocrService = ocrService;
+    }
+
+    @GetMapping
+    public String extractText() throws Exception {
+        return ocrService.extractText();
+    }
+}
+
 @RestController
 @RequestMapping("/api/ocr")
 public class OcrController {
