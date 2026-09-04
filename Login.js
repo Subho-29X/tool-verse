@@ -6,6 +6,68 @@
 
 
 
+package com.axess.training;
+
+import net.sourceforge.tess4j.ITesseract;
+import net.sourceforge.tess4j.Tesseract;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.PDFRenderer;
+import org.springframework.stereotype.Service;
+
+import java.awt.image.BufferedImage;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+@Service
+public class OcrService {
+
+    public String extractText() throws Exception {
+
+        // Test PDF location
+        Path pdfPath = Paths.get("test-files", "testOCR.pdf");
+
+        StringBuilder result = new StringBuilder();
+
+        try (PDDocument document = Loader.loadPDF(pdfPath.toFile())) {
+
+            PDFRenderer renderer = new PDFRenderer(document);
+
+            // Create Tesseract
+            ITesseract tesseract = new Tesseract();
+
+            // Tesseract tessdata folder
+            tesseract.setDatapath(
+                    "C:/Program Files/Tesseract-OCR/tessdata"
+            );
+
+            // English language
+            tesseract.setLanguage("eng");
+
+            // OCR every page
+            for (int page = 0;
+                 page < document.getNumberOfPages();
+                 page++) {
+
+                BufferedImage image =
+                        renderer.renderImageWithDPI(page, 300);
+
+                String text = tesseract.doOCR(image);
+
+                result.append(text);
+                result.append("\n");
+            }
+        }
+
+        return result.toString();
+    }
+}
+
+
+
+
+
+
 
 package com.axess.training;
 
