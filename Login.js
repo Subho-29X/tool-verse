@@ -5,6 +5,25 @@
 </dependency>
 
 
+@RestController
+@RequestMapping("/api/ocr")
+public class OcrController {
+
+    private final OcrService ocrService;
+
+    public OcrController(OcrService ocrService) {
+        this.ocrService = ocrService;
+    }
+
+    @PostMapping
+    public String extractText(
+            @RequestParam("file") MultipartFile file) throws Exception {
+
+        return ocrService.extractText(file);
+    }
+}
+
+
 
 @Service
 public class OcrService {
