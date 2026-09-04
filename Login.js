@@ -1,3 +1,56 @@
+<dependency>
+    <groupId>net.sourceforge.tess4j</groupId>
+    <artifactId>tess4j</artifactId>
+    <version>5.16.0</version>
+</dependency>
+
+
+
+@Service
+public class OcrService {
+
+    public String extractText(MultipartFile file) throws Exception {
+
+        Path tempFile = Files.createTempFile("upload-", ".pdf");
+        file.transferTo(tempFile.toFile());
+
+        StringBuilder result = new StringBuilder();
+
+        try (PDDocument document = Loader.loadPDF(tempFile.toFile())) {
+
+            PDFRenderer renderer = new PDFRenderer(document);
+
+            ITesseract tesseract = new Tesseract();
+
+            // Tesseract installation directory
+            tesseract.setDatapath(
+                "C:/Program Files/Tesseract-OCR/tessdata"
+            );
+
+            tesseract.setLanguage("eng");
+
+            for (int page = 0; page < document.getNumberOfPages(); page++) {
+
+                BufferedImage image =
+                    renderer.renderImageWithDPI(page, 300);
+
+                String text = tesseract.doOCR(image);
+
+                result.append(text).append("\n");
+            }
+        }
+
+        Files.deleteIfExists(tempFile);
+
+        return result.toString();
+    }
+}
+
+
+
+
+
+
 import React, { useState } from "react";
 import "./Login.css";
 // Make sure this file exists in your src/ folder (or update path accordingly)
