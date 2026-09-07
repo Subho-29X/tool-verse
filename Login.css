@@ -9,6 +9,29 @@
   --sc-border: #e2e8f0;
   --sc-bg-input: #f8fafc;
 }
+
+
+@GetMapping("/{customerId}")
+public ResponseEntity<DashboardResponseDto> getDashboard(
+        @PathVariable Long customerId,
+        Authentication authentication) {
+
+    CustomUserDetails userDetails =
+            (CustomUserDetails) authentication.getPrincipal();
+
+    Long loggedInCustomerId =
+            userDetails.getUsers().getUserId();
+
+    if (!loggedInCustomerId.equals(customerId)) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
+    return ResponseEntity.ok(
+        dashboardServiceImpl.getDashboard(customerId)
+    );
+}
+
+
 .authorizeHttpRequests(authorize -> authorize
 
     .requestMatchers(
