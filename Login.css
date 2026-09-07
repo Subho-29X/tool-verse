@@ -11,6 +11,31 @@
 }
 
 
+@PutMapping("/{customerId}")
+public ResponseEntity<ProfileResponseDto> updateProfile(
+        @PathVariable Long customerId,
+        @RequestBody ProfileUpdateRequestDto request,
+        Authentication authentication) {
+
+    CustomUserDetails userDetails =
+            (CustomUserDetails) authentication.getPrincipal();
+
+    Long loggedInCustomerId =
+            userDetails.getUsers().getUserId();
+
+    if (!loggedInCustomerId.equals(customerId)) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
+    try {
+        return ResponseEntity.ok(
+                profileServiceImpl.updateProfile(customerId, request)
+        );
+    } catch (IllegalArgumentException exception) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+}
+
 @GetMapping("/{customerId}")
 public ResponseEntity<ProfileResponseDto> getProfile(
         @PathVariable Long customerId,
