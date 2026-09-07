@@ -9,6 +9,35 @@
   --sc-border: #e2e8f0;
   --sc-bg-input: #f8fafc;
 }
+.authorizeHttpRequests(authorize -> authorize
+
+    .requestMatchers(
+        "/swagger-ui/**",
+        "/v3/api-docs/**",
+        "/swagger-resources/**",
+        "/webjars/**",
+        "/api/auth/**"
+    ).permitAll()
+
+    // CUSTOMER
+    .requestMatchers(
+        "/api/dashboard/**",
+        "/api/profile/**",
+        "/api/loan-applications/customer/**",
+        "/api/loan-applications"
+    ).hasRole("CUSTOMER")
+
+    // MAKER
+    .requestMatchers("/api/maker/**")
+        .hasRole("MAKER")
+
+    // CHECKER
+    .requestMatchers("/api/checker/**")
+        .hasRole("CHECKER")
+
+    .anyRequest().authenticated()
+)
+
 
 I have a Spring Boot + React loan application project.
 
