@@ -10,6 +10,9 @@
   --sc-bg-input: #f8fafc;
 }
 
+
+Implement Spring Security authentication in my existing Loan Origination Spring Boot project. Follow the standard UserDetailsService + UserDetails + DaoAuthenticationProvider + AuthenticationManager + BCryptPasswordEncoder approach. Use my existing Users entity, UserRepository, AuthController, AuthServiceImpl, and LoginRequest. Create/modify only the necessary classes. User email should be the username, passwordHash the stored password, isActive should control whether login is allowed, and role should become a Spring Security authority. Move password validation to Spring Security using AuthenticationManager and PasswordEncoder.matches(). Keep the existing LoginResponse API response format and don’t add signup functionality. Remove redundant manual password authentication from AuthServiceImpl. Do not use database password-hashing triggers. Make the implementation compile and preserve existing functionality.
+
 * {
   box-sizing: border-box;
   margin: 0;
