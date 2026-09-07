@@ -10,6 +10,261 @@
   --sc-bg-input: #f8fafc;
 }
 
+I have a Spring Boot + React loan application project.
+
+IMPORTANT:
+- Do NOT introduce JWT.
+- I want to use Spring Security with HTTP Basic Authentication.
+- Do not unnecessarily change the existing architecture or APIs.
+- Make the minimum required code changes.
+- Preserve all existing functionality.
+
+Current backend security setup:
+- SecurityConfig.java
+- CustomUserDetails.java
+- CustomUserDetailsService.java
+- AuthServiceImpl.java
+- UserRepository.java
+- Users entity
+
+CustomUserDetails already returns authorities like:
+ROLE_CUSTOMER
+ROLE_MAKER
+ROLE_CHECKER
+
+AuthServiceImpl already uses:
+AuthenticationManager
+UsernamePasswordAuthenticationToken
+PasswordEncoder
+
+The application currently has these roles:
+1. CUSTOMER
+2. MAKER
+3. CHECKER
+
+Required role-based access:
+
+CUSTOMER should be able to access:
+- /api/profile/**
+- /api/dashboard/**
+- /api/loan-applications/customer/**
+
+MAKER should be able to access:
+- /api/maker/**
+- /api/maker/queue
+
+CHECKER should be able to access:
+- /api/checker/**
+- /api/checker/queue
+
+Authentication/public APIs:
+- /api/auth/**
+- Swagger/OpenAPI endpoints should remain public:
+  /swagger-ui/**
+  /v3/api-docs/**
+  /swagger-resources/**
+  /webjars/**
+
+Everything else should require authentication.
+
+Use:
+.hasRole("CUSTOMER")
+.hasRole("MAKER")
+.hasRole("CHECKER")
+
+Do NOT use hasAuthority("ROLE_CUSTOMER") unless there is a specific reason, because CustomUserDetails already prefixes the roles with ROLE_.
+
+HTTP Basic:
+Keep:
+.httpBasic(Customizer.withDefaults())
+
+Do NOT add JWT, JwtFilter, OncePerRequestFilter, tokens, refresh tokens, etc.
+
+Session:
+The application currently uses stateless security. Keep it stateless if it is compatible with HTTP Basic.
+
+Frontend:
+The React application runs on:
+http://localhost:3000
+
+Backend runs on:
+http://localhost:8080
+
+The frontend currently gets 403 when calling protected APIs such as:
+GET http://localhost:8080/api/dashboard/101
+GET http://localhost:8080/api/loan-applications/customer/101
+
+Fix the frontend authentication so protected Axios requests send HTTP Basic credentials.
+
+Use Axios's built-in auth option, for example:
+
+axios.get(url, {
+    auth: {
+        username: email,
+        password: password
+    }
+});
+
+Do not store plaintext passwords unnecessarily in localStorage/sessionStorage.
+
+CORS:
+Make sure the backend allows the React origin:
+http://localhost:3000
+
+Allow the Authorization header and the required HTTP methods.
+
+The current browser error is:
+"No 'Access-Control-Allow-Origin' header is present"
+and some requests return 403.
+
+Fix CORS without disabling Spring Security.
+
+Password hashing:
+Make sure passwords are NEVER stored as plaintext in the database.
+
+Password creation/registration must use:
+
+passwordEncoder.encode(rawPassword)
+
+before saving the Users entity.
+
+Password reset must also use:
+
+users.setPasswordHash(passwordEncoder.encode(newPassword));
+
+The reset-password implementation already appears to do this, so do not duplicate it unnecessarily.
+
+Authentication must compare the raw login password against the encoded database password through Spring Security's PasswordEncoder.
+
+Verify that a PasswordEncoder bean exists, preferably BCryptPasswordEncoder.
+
+For example:
+
+@Bean
+public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+}
+
+Important:
+The existing database currently contains some plaintext test passwords. Do NOT assume Spring Security will automatically convert those existing values.
+
+Explain how to clean/recreate/update the test users so their passwords are BCrypt encoded.
+
+Also note that existing plaintext passwords should not be used as BCrypt hashes.
+
+Expected behavior:
+
+Customer:
+- Can login.
+- Can access their dashboard/profile/customer loan application APIs.
+- Cannot access maker APIs.
+- Cannot access checker APIs.
+
+Maker:
+- Can access maker dashboard/queue/application APIs.
+- Cannot access customer-only APIs unless explicitly required.
+- Cannot access checker APIs.
+
+Checker:
+- Can access checker dashboard/queue/application APIs.
+- Cannot access maker APIs.
+
+Unauthenticated user:
+- Can access /api/auth/**
+- Can access Swagger.
+- Gets 401 for protected APIs.
+
+Authenticated user with the wrong role:
+- Gets 403.
+
+Also check the existing API paths from the controllers before modifying SecurityConfig. Do not blindly add incorrect paths.
+
+The existing APIs include:
+
+Profile:
+GET /api/profile/{customerId}
+PUT /api/profile/{customerId}
+
+Maker:
+POST /api/maker/applications/{applicationId}/submit-to-checker
+POST /api/maker/applications/{applicationId}/save-draft
+POST /api/maker/applications/{applicationId}/reject
+GET /api/maker/applications/{applicationId}
+
+Loan applications:
+POST /api/loan-applications
+GET /api/loan-applications/reference/{referenceNumber}
+GET /api/loan-applications/maker/{applicationId}
+GET /api/loan-applications/customer/{customerId}
+
+Checker:
+POST /api/checker/applications/{applicationId}/reject
+POST /api/checker/applications/{applicationId}/approve
+GET /api/checker/applications/{applicationId}
+
+Auth:
+POST /api/auth/login
+POST /api/auth/forgot-password/reset
+GET /api/auth/forgot-password/{identifier}
+
+Documents:
+GET /api/applications/{applicationId}/documents
+POST /api/applications/{applicationId}/documents
+GET /api/documents/{documentId}/view
+DELETE /api/documents/{documentId}
+
+Maker queue:
+GET /api/maker/queue
+
+Dashboard:
+GET /api/dashboard/{customerId}
+
+Checker queue:
+GET /api/checker/queue
+
+IMPORTANT SECURITY DETAIL:
+Do not only secure the frontend pages. The backend API endpoints themselves must enforce the roles. Hiding a React page is NOT security.
+
+Also, for customer-specific endpoints such as:
+GET /api/dashboard/{customerId}
+GET /api/profile/{customerId}
+GET /api/loan-applications/customer/{customerId}
+
+consider whether a CUSTOMER should be allowed to request another customer's ID. If possible, enforce that the authenticated customer's user ID matches {customerId}. Do not rely only on the frontend.
+
+For MAKER/CHECKER endpoints, enforce their roles at the backend.
+
+Before making changes:
+1. Inspect the existing SecurityConfig.
+2. Inspect CustomUserDetails.
+3. Inspect CustomUserDetailsService.
+4. Inspect AuthServiceImpl.
+5. Inspect the Users entity and UserRepository.
+6. Inspect the actual controller mappings.
+7. Inspect the existing CORS configuration.
+8. Inspect the frontend Axios/authentication code.
+
+Then:
+- Make the required changes.
+- Show me each changed file.
+- Explain each change briefly.
+- Do not rewrite unrelated code.
+- Do not introduce JWT.
+- Do not remove existing authentication logic.
+- Make sure the project compiles.
+- Point out any existing database records that need to be recreated/updated because their passwords are currently plaintext.
+
+Finally, give me a simple test checklist showing:
+Customer login → customer API → expected 200
+Customer → maker API → expected 403
+Maker → maker API → expected 200
+Maker → checker API → expected 403
+Checker → checker API → expected 200
+Checker → maker API → expected 403
+No credentials → protected API → expected 401
+Swagger → expected accessible
+Auth login → expected accessible
+
 
 Implement Spring Security authentication in my existing Loan Origination Spring Boot project. Follow the standard UserDetailsService + UserDetails + DaoAuthenticationProvider + AuthenticationManager + BCryptPasswordEncoder approach. Use my existing Users entity, UserRepository, AuthController, AuthServiceImpl, and LoginRequest. Create/modify only the necessary classes. User email should be the username, passwordHash the stored password, isActive should control whether login is allowed, and role should become a Spring Security authority. Move password validation to Spring Security using AuthenticationManager and PasswordEncoder.matches(). Keep the existing LoginResponse API response format and don’t add signup functionality. Remove redundant manual password authentication from AuthServiceImpl. Do not use database password-hashing triggers. Make the implementation compile and preserve existing functionality.
 
