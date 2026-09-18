@@ -9,7 +9,55 @@
   --sc-border: #e2e8f0;
   --sc-bg-input: #f8fafc;
 }
+"Every time we want to experiment with AI, we hit the same two walls: exploding API bills and strict data privacy rules.
 
+We have the talent to build incredible things, but we are being held back by the fear of per-token costs. Today, I’m proposing a way to shatter both of those walls. We are going to build our own internal AI Innovation Lab—an environment where we can research, prototype, and build with absolute freedom, zero token anxiety, and 100% data privacy.
+
+And the best part? We are going to launch it for exactly zero dollars in upfront hardware costs."
+
+Architecture: Local CPU + Cloud Bursting
+(Click to the Architecture slide. Gesture to the diagram.)
+
+"Instead of asking leadership for a massive capital expenditure on day one, we are going to be smart about this. We will repurpose what we already have sitting idle: existing office servers, virtual machines, or even high-RAM developer desktops.
+
+By utilizing highly optimized, open-weight Small Language Models—like Llama 3 or Mistral—running on lightweight frameworks like Ollama, we can achieve fast, intelligent inference entirely on standard CPUs. We prove the value first, and we only ask for specialized hardware once we have the data to back it up."
+
+Phase 1: MVP 1 (Months 1–3) — The Foundation
+(Click to Phase 1. Keep your pacing brisk and energetic.)
+
+"Here is how the next 12 months play out. Months 1 through 3 are our Foundation phase. This is our zero-GPU, CPU-only sandbox.
+
+We provision a couple of our existing virtual machines, install a clean web interface, and onboard 15 to 20 internal champions. This is where we start accelerating our daily work—text summarization, code brainstorming, and internal drafting. It is 100% secure, completely private, and costs the institution absolutely nothing in new hardware."
+
+Phase 2: MVP 2 (Months 4–6) — Intelligent Routing
+(Click to Phase 2. Emphasize the cost-saving aspect here—this is what leads care about.)
+
+"As adoption grows in Months 4 to 6, we will inevitably hit heavier tasks like massive code generation or complex reasoning. This is where we introduce the 'smart gateway.'
+
+We implement a dynamic router. The logic is simple: standard, everyday queries stay on our free, local CPU servers. But if a user needs heavy lifting, the system seamlessly 'bursts' that specific request to a cloud API using a strictly capped monthly budget.
+
+This is our milestone for leadership: we will prove that we can handle 80% of our workloads locally for free, saving thousands of dollars, while only paying for the 20% that truly requires it."
+
+Phase 3: MVP 3 (Months 7–9) — AIaaS & The First GPUs
+(Click to Phase 3. Speak with momentum; this is the turning point of the pitch.)
+
+"Armed with six months of hard usage data and undeniable ROI, we enter Months 7 to 9. This is when we make our business case for dedicated hardware.
+
+We procure a mid-range, multi-GPU workstation to bring that remaining 20% of workloads entirely in-house. But we don't just stop at a chat interface. We turn this into AI-as-a-Service for the institution. We provide internal API endpoints so our developers can bake AI directly into our internal tools and platforms, managed through strict rate limits to ensure fair, multi-tenant access."
+
+Phase 4: MVP 4 (Months 10–12) — Enterprise Scale
+(Click to Phase 4. Slow your pace slightly to emphasize the final impact.)
+
+"Finally, Months 10 to 12. We have the hardware, we have the infrastructure—now we make it ours.
+
+We use parameter-efficient fine-tuning on those local GPUs to train these models on our proprietary codebases and institutional knowledge. We connect them directly to our internal databases securely, allowing any employee to query our specific data instantly.
+
+The Close
+(Click to the final End State slide. Look back at the team.)
+
+"By month 12, we will have transformed from relying on expensive, public APIs to owning a fully scalable, shared, and cost-optimized AI Lab. We generate our own intellectual property, we upskill our entire team, and we do it securely on-premise.
+
+We have the roadmap, we have the talent, and we can start Phase 1 today without spending a dime. Let’s build this."
 
 @PutMapping("/{customerId}")
 public ResponseEntity<ProfileResponseDto> updateProfile(
