@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI Lab: Database Structure &amp; Storage Estimate</title>
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#f6f7f9; --fg:#1b1f24; --muted:#5b6570; --card:#ffffff; --border:#dde1e6;
+  --blue:#2563eb; --violet:#7c3aed; --amber:#d97706; --green:#059669; --red:#dc2626; --teal:#0d9488;
+  --box:#eef1f5; --accent:#eaf1ff;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111418; --fg:#e8ebef; --muted:#9aa4af; --card:#1a1e24; --border:#2c333b;
+    --blue:#60a5fa; --violet:#a78bfa; --amber:#fbbf24; --green:#34d399; --red:#f87171; --teal:#2dd4bf;
+    --box:#222831; --accent:#1c2a44;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111418; --fg:#e8ebef; --muted:#9aa4af; --card:#1a1e24; --border:#2c333b;
+  --blue:#60a5fa; --violet:#a78bfa; --amber:#fbbf24; --green:#34d399; --red:#f87171; --teal:#2dd4bf;
+  --box:#222831; --accent:#1c2a44;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.5}
+.wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
+h1{font-size:26px;margin:0 0 4px}
+h2{font-size:19px;margin:40px 0 4px}
+h3{font-size:15px;margin:0 0 6px}
+p.sub{color:var(--muted);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);white-space:nowrap}
+td.n{white-space:nowrap}
+td.r,th.r{text-align:right}
+tr.grp td{background:var(--box);font-weight:700;font-size:13px;letter-spacing:.03em}
+tr.total td{font-weight:700;border-bottom:none}
+code{background:var(--box);padding:1px 6px;border-radius:5px;font-size:13px}
+pre{background:var(--box);padding:12px;border-radius:8px;overflow-x:auto;font-size:13px;margin:8px 0 0}
+.pill{display:inline-block;padding:1px 9px;border-radius:99px;font-size:12px;font-weight:600;border:1px solid currentColor}
+.p-static{color:var(--muted)} .p-slow{color:var(--teal)} .p-fast{color:var(--amber)} .p-huge{color:var(--red)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+ul{margin:6px 0 0;padding-left:20px} li{margin:4px 0}
+.note{border-left:4px solid var(--amber);padding:10px 14px;background:var(--card);border-radius:0 10px 10px 0;font-size:14px;margin-top:12px}
+.good{border-left-color:var(--green)}
+
+/* calculator */
+.presets{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+button{font:inherit;cursor:pointer;border:1px solid var(--border);background:var(--box);color:var(--fg);padding:6px 14px;border-radius:99px}
+button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) button.on{color:#0b1220}}
+:root[data-theme="dark"] button.on{color:#0b1220}
+.inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.inputs label{display:block;font-size:12px;color:var(--muted)}
+.inputs input{width:100%;margin-top:3px;padding:7px 9px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--fg);font:inherit;font-size:15px}
+.big{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:14px 0}
+.big div{background:var(--accent);border-radius:10px;padding:12px}
+.big b{display:block;font-size:22px}
+.big span{font-size:12px;color:var(--muted)}
+.bar{display:flex;height:12px;border-radius:99px;overflow:hidden;background:var(--box);min-width:90px}
+.bar i{display:block;height:100%}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>AI Lab: Database Structure &amp; Storage Estimate</h1>
+  <p class="sub">Everything on the Mac mini: PostgreSQL, the member and admin web UI, login, bookings, guardrail logs and uploaded files, The Mac mini's 512 GB internal drive holds the software, and the 4 TB external SSD holds only lab data (database, uploads, logs).</p>
+
+  <!-- ===================== 1. TABLES ===================== -->
+  <h2>1. Database tables: what each one does and why it is needed</h2>
+  <p class="sub">12 tables and 1 view. "Growth" shows how fast each one fills up. Row sizes are approximate and include indexes.</p>
+  <div class="card scroll">
+    <table>
+      <thead><tr><th>Table</th><th>Use</th><th>Why it is necessary</th><th>Row size</th><th>Growth</th></tr></thead>
+      <tbody>
+        <tr class="grp"><td colspan="5">PEOPLE</td></tr>
+        <tr><td class="n"><code>departments</code></td><td>List of teams (Engineering, HR, Finance...).</td><td>Lets you report usage and set limits per team, and keeps team names consistent.</td><td class="n">~100 bytes</td><td><span class="pill p-static">Static</span></td></tr>
+        <tr><td class="n"><code>users</code></td><td>One row per person: name, email, role, status, token limit, SSO id.</td><td>Everything else points to a user. Lets you suspend someone without losing history.</td><td class="n">~400 bytes</td><td><span class="pill p-static">Static</span></td></tr>
+        <tr><td class="n"><code>api_keys</code></td><td>Keys issued to users or scripts, stored as hashes with expiry and revoke date.</td><td>Revoke one key without touching the others; a database leak exposes no usable keys.</td><td class="n">~300 bytes</td><td><span class="pill p-slow">Slow</span></td></tr>
+        <tr class="grp"><td colspan="5">HARDWARE AND MODELS</td></tr>
+        <tr><td class="n"><code>nodes</code></td><td>Studio A and B: IP address, memory, status.</td><td>Bookings and messages refer to a machine; lets you mark one as "maintenance".</td><td class="n">~200 bytes</td><td><span class="pill p-static">Static</span></td></tr>
+        <tr><td class="n"><code>models</code></td><td>Catalog of models: size, quantization, runtime, vision support, purpose.</td><td>One consistent name per model; the router can choose by capability.</td><td class="n">~300 bytes</td><td><span class="pill p-static">Static</span></td></tr>
+        <tr><td class="n"><code>node_models</code></td><td>Which model runs on which node and port.</td><td>A live map for the load balancer; many-to-many between machines and models.</td><td class="n">~100 bytes</td><td><span class="pill p-static">Static</span></td></tr>
+        <tr class="grp"><td colspan="5">BOOKINGS</td></tr>
+        <tr><td class="n"><code>bookings</code></td><td>Reservation of a node (and optionally a model) for a time slot, with status.</td><td>Stops two people taking a dedicated machine at once; the database itself rejects overlaps.</td><td class="n">~700 bytes</td><td><span class="pill p-slow">Slow</span></td></tr>
+        <tr class="grp"><td colspan="5">CHAT</td></tr>
+        <tr><td class="n"><code>chat_sessions</code></td><td>One row per conversation: owner, title, default model.</td><td>Groups the requests of one conversation (the client sends a session id) so history stays together and private per user.</td><td class="n">~300 bytes</td><td><span class="pill p-slow">Slow</span></td></tr>
+        <tr><td class="n"><code>messages</code></td><td>Every prompt and reply: text, redacted copy, model, node, tokens, latency, request id.</td><td>Conversation history, plus the source for usage, speed and debugging.</td><td class="n">~5 to 15 KB per exchange</td><td><span class="pill p-fast">Fast</span></td></tr>
+        <tr><td class="n"><code>attachments</code></td><td>Path, type, size and checksum of uploaded files. The files sit on the SSD.</td><td>Large files do not belong inside the database; only the pointer is stored.</td><td class="n">~500 bytes (+ the file)</td><td><span class="pill p-huge">Files are biggest</span></td></tr>
+        <tr class="grp"><td colspan="5">SAFETY AND TRACKING</td></tr>
+        <tr><td class="n"><code>guardrail_events</code></td><td>Each Presidio, Gitleaks or Qwen3Guard check and whether it allowed, redacted or blocked.</td><td>Shows who triggers filters, how often, and whether a rule is too strict or too loose.</td><td class="n">~350 bytes</td><td><span class="pill p-fast">Fast</span></td></tr>
+        <tr><td class="n"><code>audit_logs</code></td><td>Logins, booking changes, key revocations, role changes, with IP address.</td><td>Accountability trail for security reviews and compliance.</td><td class="n">~450 bytes</td><td><span class="pill p-slow">Slow</span></td></tr>
+        <tr class="grp"><td colspan="5">REPORTING</td></tr>
+        <tr><td class="n"><code>usage_daily</code> (view)</td><td>Daily requests, tokens and average latency per user and model.</td><td>Feeds dashboards without storing the same numbers twice.</td><td class="n">0 (computed)</td><td><span class="pill p-static">None</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===================== 2. MEMBER / ADMIN ===================== -->
+  <h2>2. Member view and admin view (web portal and API)</h2>
+  <p class="sub">There is no chat screen. The lab is used only through API endpoints with an API key. The web portal on the Mac mini is for bookings, keys, usage and administration. Login (SSO) decides which screens appear, and Postgres row-level security makes sure members can only read their own rows.</p>
+  <div class="grid">
+    <div class="card">
+      <h3>Member view</h3>
+      <ul>
+        <li><b>API requests:</b> members call the lab through API endpoints with their own key. Each call is saved as a session and messages, and members can review their own request history and uploaded files (<code>chat_sessions</code>, <code>messages</code>, <code>attachments</code>)</li>
+        <li><b>Book a slot:</b> pick a node and time, see own bookings and their status (<code>bookings</code>)</li>
+        <li><b>My usage:</b> own tokens and requests (<code>usage_daily</code>)</li>
+        <li><b>My API keys:</b> create or revoke own keys (<code>api_keys</code>)</li>
+        <li><b>Blocked or masked requests:</b> see which of their own API calls were masked or blocked, and why (own rows of <code>guardrail_events</code>)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Admin view</h3>
+      <ul>
+        <li><b>Users and teams:</b> invite, suspend, change role and token limit (<code>users</code>, <code>departments</code>)</li>
+        <li><b>Bookings:</b> approve or reject, see the calendar for both Studios (<code>bookings</code>)</li>
+        <li><b>Nodes and models:</b> online or maintenance, which model is on which port (<code>nodes</code>, <code>models</code>, <code>node_models</code>)</li>
+        <li><b>Safety:</b> guardrail hits by user, category and checker (<code>guardrail_events</code>)</li>
+        <li><b>Audit log:</b> who did what, from which IP (<code>audit_logs</code>)</li>
+        <li><b>Reports and health:</b> usage per team, latency, storage left (<code>usage_daily</code>, Grafana)</li>
+      </ul>
+    </div>
+  </div>
+  <div class="note good">Login itself (passwords, MFA, SSO sessions) lives in the identity system (Keycloak or Authentik) with its own small database. The <code>users</code> table keeps only the SSO id, so passwords never sit in your app tables.</div>
+
+  <!-- ===================== 3. CALCULATOR ===================== -->
+  <h2>3. How much data will it store? (interactive estimate)</h2>
+  <p class="sub">Pick a preset or change the numbers. Results update instantly.</p>
+  <div class="card">
+    <div class="presets" id="presets">
+      <button data-p="small">Small team</button>
+      <button data-p="office" class="on">Office (default)</button>
+      <button data-p="heavy">Heavy use</button>
+    </div>
+    <div class="inputs">
+      <label>Users (members)<input id="users" type="number" min="1" value="50"></label>
+      <label>% active on a working day<input id="active" type="number" min="1" max="100" value="60"></label>
+      <label>Exchanges per active user per day<input id="msgs" type="number" min="1" value="25"></label>
+      <label>Avg prompt size (tokens)<input id="ptok" type="number" min="1" value="400"></label>
+      <label>Avg reply size (tokens)<input id="rtok" type="number" min="1" value="700"></label>
+      <label>% of exchanges with an upload<input id="attpct" type="number" min="0" max="100" value="10"></label>
+      <label>Avg upload size (MB)<input id="attmb" type="number" min="0" step="0.1" value="1.5"></label>
+      <label>Working days per week<input id="days" type="number" min="1" max="7" value="5"></label>
+    </div>
+
+    <div class="big">
+      <div><b id="o-week">-</b><span>per week</span></div>
+      <div><b id="o-month">-</b><span>per month</span></div>
+      <div><b id="o-year">-</b><span>per year</span></div>
+      <div><b id="o-fill">-</b><span>until the 4 TB SSD is full (no cleanup)</span></div>
+    </div>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th>What is stored</th><th class="r">Per day</th><th class="r">Per week</th><th class="r">Per month</th><th class="r">Per year</th><th>Share of month</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <div class="note">Per day means per working day, except metrics, which run every day. A month is 4.33 weeks. Numbers are decimal (1 GB = 1,000 MB).</div>
+  </div>
+
+  <h3 style="margin-top:22px">Assumptions behind the numbers</h3>
+  <div class="card scroll">
+    <table>
+      <thead><tr><th>Item</th><th>Assumption</th></tr></thead>
+      <tbody>
+        <tr><td>Text size</td><td>1 token is about 4 bytes of English text.</td></tr>
+        <tr><td>Chat messages</td><td>Prompt and reply stored twice (original plus redacted copy), about 350 bytes of row data per message, plus 30% for indexes.</td></tr>
+        <tr><td>Guardrail events</td><td>About 5 check rows per exchange (Presidio, Gitleaks, Qwen3Guard on the prompt, plus output checks), about 350 bytes each.</td></tr>
+        <tr><td>App and proxy logs</td><td>About 1.5 KB per exchange across LiteLLM, the proxy and the UI.</td></tr>
+        <tr><td>Logins, audit, bookings</td><td>3 logins and about 12 audit events per active user per day (about 450 bytes each), and 2 bookings per user per week (about 700 bytes each).</td></tr>
+        <tr><td>Metrics (Prometheus)</td><td>About 10 MB per day for two Studios and the mini, at 15-second scrapes.</td></tr>
+        <tr><td>Uploads</td><td>Stored as files on the SSD, not in the database.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===================== 4. FIXED FOOTPRINT ===================== -->
+  <h2>4. Storage on the Mac mini: internal drive vs external SSD</h2>
+  <div class="grid" style="margin-bottom:12px">
+    <div class="card"><h3>Internal drive: 512 GB</h3><p style="margin:0;font-size:14px">macOS, containers and software, and the guard models (Qwen3Guard, Presidio). This is a fixed size of about 10 to 35 GB, so most of the drive stays free.</p></div>
+    <div class="card"><h3>External SSD: 4 TB</h3><p style="margin:0;font-size:14px">Lab data only: the Postgres data folder, uploaded files, logs and metrics. This is the part that grows with use (see section 3). Keep backups on a different drive.</p></div>
+  </div>
+  <p class="sub">One-time footprint on the internal drive, before any user data:</p>
+  <div class="card scroll">
+    <table>
+      <thead><tr><th>Item</th><th class="r">Approx. size</th></tr></thead>
+      <tbody>
+        <tr><td>Containers and software (Postgres program files, Redis, LiteLLM, Keycloak, the member and admin portal, Prometheus, Grafana, proxy)</td><td class="n r">8 to 15 GB</td></tr>
+        <tr><td>Qwen3Guard model (size depends on the variant you pick)</td><td class="n r">1 to 16 GB</td></tr>
+        <tr><td>Presidio language models and Gitleaks</td><td class="n r">1 to 2 GB</td></tr>
+        <tr><td>Member and admin portal build</td><td class="n r">0.1 to 0.5 GB</td></tr>
+        <tr class="total"><td>Total fixed</td><td class="n r">about 10 to 35 GB</td></tr>
+      </tbody>
+    </table>
+    <div class="note">The big model files (DeepSeek V4-Flash, Qwen3-Coder-Next and so on) live on the two Mac Studios, not on the mini. Their 1 TB drives are for models only. On the mini, point the Postgres data folder and the upload folder at the external SSD (for example <code>/Volumes/LabData</code>) so user data never fills the internal drive.</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var fields = ['users','active','msgs','ptok','rtok','attpct','attmb','days'];
+  var presets = {
+    small:  {users:20,  active:60, msgs:15, ptok:300, rtok:500,  attpct:5,  attmb:1.0, days:5},
+    office: {users:50,  active:60, msgs:25, ptok:400, rtok:700,  attpct:10, attmb:1.5, days:5},
+    heavy:  {users:200, active:70, msgs:40, ptok:800, rtok:1200, attpct:15, attmb:2.0, days:5}
+  };
+  var colors = ['var(--blue)','var(--violet)','var(--teal)','var(--green)','var(--amber)','var(--red)','var(--muted)'];
+
+  function fmt(b){
+    var u = ['B','KB','MB','GB','TB'], i = 0;
+    while (b >= 1000 && i < 4){ b /= 1000; i++; }
+    var d = b >= 100 ? 0 : (b >= 10 ? 1 : 2);
+    return b.toFixed(d) + ' ' + u[i];
+  }
+
+  function calc(){
+    var v = {};
+    fields.forEach(function(f){ v[f] = parseFloat($(f).value) || 0; });
+    var activeUsers = v.users * v.active / 100;
+    var ex = activeUsers * v.msgs;                       // exchanges per working day
+    var content = (v.ptok + v.rtok) * 4;                 // bytes of text per exchange
+    var weeksPerMonth = 4.33;
+
+    // each row: [label, bytes per working day, bytes per calendar day (metrics only)]
+    var rows = [
+      ['Chat messages and sessions (Postgres)', ex * ((content * 2 + 700) * 1.3 + 150), 0],
+      ['Guardrail events (Postgres)',           ex * 1750, 0],
+      ['App, proxy and LiteLLM logs',           ex * 1500, 0],
+      ['Logins, audit log, bookings',           activeUsers * (3 * 600 + 12 * 450) + (v.users * 2 / Math.max(v.days,1)) * 700, 0],
+      ['Metrics (Prometheus)',                  0, 10e6],
+      ['Uploaded files on the SSD',             ex * v.attpct / 100 * v.attmb * 1e6, 0]
+    ];
+
+    var out = rows.map(function(r){
+      var week = r[1] * v.days + r[2] * 7;
+      var day  = r[2] ? r[2] : r[1];
+      return {label:r[0], day:day, week:week, month:week * weeksPerMonth, year:week * 52};
+    });
+    var tot = out.reduce(function(a, r){
+      return {day:a.day + r.day, week:a.week + r.week, month:a.month + r.month, year:a.year + r.year};
+    }, {day:0, week:0, month:0, year:0});
+
+    var html = out.map(function(r, i){
+      var share = tot.month ? r.month / tot.month * 100 : 0;
+      return '<tr><td>' + r.label + '</td><td class="n r">' + fmt(r.day) + '</td><td class="n r">' + fmt(r.week) +
+        '</td><td class="n r">' + fmt(r.month) + '</td><td class="n r">' + fmt(r.year) +
+        '</td><td><div class="bar"><i style="width:' + share.toFixed(1) + '%;background:' + colors[i % colors.length] + '"></i></div></td></tr>';
+    }).join('');
+    html += '<tr class="total"><td>Total</td><td class="n r">' + fmt(tot.day) + '</td><td class="n r">' + fmt(tot.week) +
+      '</td><td class="n r">' + fmt(tot.month) + '</td><td class="n r">' + fmt(tot.year) + '</td><td></td></tr>';
+    $('rows').innerHTML = html;
+
+    $('o-week').textContent  = fmt(tot.week);
+    $('o-month').textContent = fmt(tot.month);
+    $('o-year').textContent  = fmt(tot.year);
+
+    var usable = 3600e9;                                 // ~4 TB external drive, lab data only
+    var years = tot.year ? usable / tot.year : Infinity;
+    $('o-fill').textContent = !isFinite(years) ? '-' : (years >= 100 ? '100+ years' : (years >= 1 ? years.toFixed(1) + ' years' : (years * 12).toFixed(1) + ' months'));
+  }
+
+  fields.forEach(function(f){ $(f).addEventListener('input', function(){
+    document.querySelectorAll('#presets button').forEach(function(b){ b.classList.remove('on'); });
+    calc();
+  }); });
+
+  document.querySelectorAll('#presets button').forEach(function(b){
+    b.addEventListener('click', function(){
+      var p = presets[b.getAttribute('data-p')];
+      fields.forEach(function(f){ $(f).value = p[f]; });
+      document.querySelectorAll('#presets button').forEach(function(x){ x.classList.remove('on'); });
+      b.classList.add('on');
+      calc();
+    });
+  });
+
+  calc();
+})();
+</script>
+</body>
+</html>
