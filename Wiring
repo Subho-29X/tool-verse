@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI Lab Setup: Wiring & Power Plan</title>
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#f6f7f9; --fg:#1b1f24; --muted:#5b6570; --card:#ffffff; --border:#dde1e6;
+  --eth:#2563eb; --disp:#7c3aed; --pwr:#d97706; --up:#6b7280; --ok:#059669;
+  --box:#eef1f5; --boxstroke:#b8c0ca; --accent:#eaf1ff;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111418; --fg:#e8ebef; --muted:#9aa4af; --card:#1a1e24; --border:#2c333b;
+    --eth:#60a5fa; --disp:#a78bfa; --pwr:#fbbf24; --up:#9ca3af; --ok:#34d399;
+    --box:#222831; --boxstroke:#46505c; --accent:#1c2a44;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111418; --fg:#e8ebef; --muted:#9aa4af; --card:#1a1e24; --border:#2c333b;
+  --eth:#60a5fa; --disp:#a78bfa; --pwr:#fbbf24; --up:#9ca3af; --ok:#34d399;
+  --box:#222831; --boxstroke:#46505c; --accent:#1c2a44;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.5}
+.wrap{max-width:1080px;margin:0 auto;padding:24px 16px 56px}
+h1{font-size:26px;margin:0 0 4px}
+h2{font-size:18px;margin:36px 0 10px}
+p.sub{color:var(--muted);margin:0 0 18px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px}
+.scroll{overflow-x:auto}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin:0 0 12px;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:26px;height:0;border-top:4px solid}
+svg{display:block;width:100%;height:auto;min-width:760px}
+svg text{fill:var(--fg);font-family:inherit}
+svg .m{fill:var(--muted)}
+.box{fill:var(--box);stroke:var(--boxstroke);stroke-width:1.5}
+.hl{fill:var(--accent);stroke:var(--eth);stroke-width:1.5}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+td.n{white-space:nowrap}
+.tag{display:inline-block;padding:1px 8px;border-radius:99px;font-size:12px;font-weight:600;color:#fff}
+.t-eth{background:var(--eth)} .t-disp{background:var(--disp)} .t-pwr{background:var(--pwr)} .t-up{background:var(--up)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tag{color:#111}}
+:root[data-theme="dark"] .tag{color:#111}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+ul{margin:6px 0 0;padding-left:20px}
+li{margin:4px 0}
+.note{border-left:4px solid var(--pwr);padding:10px 14px;background:var(--card);border-radius:0 10px 10px 0;font-size:14px;margin-top:12px}
+code{background:var(--box);padding:1px 6px;border-radius:5px;font-size:13px}
+.total td{font-weight:700;border-bottom:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>AI Lab: Wiring &amp; Power Plan</h1>
+  <p class="sub">2× Mac Studio (M5 Ultra, 256 GB, 1 TB) as inference nodes, 1× Mac mini as the front desk (load balancer, sessions, storage), 1 switch, 3 displays.</p>
+
+  <h2>1. Network and display wiring</h2>
+  <div class="card">
+    <div class="legend">
+      <span><i style="border-color:var(--eth)"></i>Ethernet (Cat6a, 10GbE)</span>
+      <span><i style="border-color:var(--disp)"></i>Display cable</span>
+      <span><i style="border-color:var(--up);border-top-style:dashed"></i>Internet uplink</span>
+    </div>
+    <div class="scroll">
+    <svg viewBox="0 0 1000 540" role="img" aria-label="Wiring diagram of the AI lab">
+      <!-- Displays -->
+      <g>
+        <rect class="box" x="20" y="60" width="150" height="80" rx="8"/>
+        <text x="95" y="95" text-anchor="middle" font-size="15" font-weight="600">Display 1</text>
+        <text x="95" y="116" text-anchor="middle" font-size="12" class="m">HDMI input</text>
+
+        <rect class="box" x="20" y="190" width="150" height="80" rx="8"/>
+        <text x="95" y="225" text-anchor="middle" font-size="15" font-weight="600">Display 2</text>
+        <text x="95" y="246" text-anchor="middle" font-size="12" class="m">DisplayPort / USB-C</text>
+
+        <rect class="box" x="20" y="320" width="150" height="80" rx="8"/>
+        <text x="95" y="355" text-anchor="middle" font-size="15" font-weight="600">Display 3</text>
+        <text x="95" y="376" text-anchor="middle" font-size="12" class="m">DisplayPort / USB-C</text>
+      </g>
+
+      <!-- Display wires -->
+      <g fill="none" stroke="var(--disp)" stroke-width="3.5" stroke-linecap="round">
+        <path d="M170 100 H230 V185 H290"/>
+        <path d="M170 230 H230 V265 H290"/>
+        <path d="M170 360 H230 V345 H290"/>
+      </g>
+      <text x="200" y="88" text-anchor="middle" font-size="11" class="m">HDMI</text>
+      <text x="200" y="218" text-anchor="middle" font-size="11" class="m">TB5 port 1</text>
+      <text x="200" y="388" text-anchor="middle" font-size="11" class="m">TB5 port 2</text>
+
+      <!-- Mac mini -->
+      <rect class="hl" x="290" y="150" width="190" height="230" rx="12"/>
+      <text x="385" y="178" text-anchor="middle" font-size="16" font-weight="700">Mac mini (Pro)</text>
+      <text x="385" y="198" text-anchor="middle" font-size="12" class="m">Front desk</text>
+      <text x="385" y="232" text-anchor="middle" font-size="12">Load balancer :8000</text>
+      <text x="385" y="252" text-anchor="middle" font-size="12">Session + data store</text>
+      <text x="385" y="272" text-anchor="middle" font-size="12">API / booking app</text>
+      <text x="385" y="302" text-anchor="middle" font-size="12" class="m">Fixed IP 10.0.0.10</text>
+      <text x="385" y="324" text-anchor="middle" font-size="12" class="m">Ext. NVMe on TB5 port 3</text>
+      <text x="385" y="346" text-anchor="middle" font-size="12" class="m">Power: own AC cable</text>
+
+      <!-- mini to switch -->
+      <path d="M480 265 H580" fill="none" stroke="var(--eth)" stroke-width="4" stroke-linecap="round"/>
+      <text x="530" y="253" text-anchor="middle" font-size="11" class="m">10GbE</text>
+      <text x="530" y="291" text-anchor="middle" font-size="11" class="m">Cat6a</text>
+
+      <!-- Router -->
+      <rect class="box" x="570" y="50" width="140" height="64" rx="8"/>
+      <text x="640" y="80" text-anchor="middle" font-size="14" font-weight="600">Router / Internet</text>
+      <text x="640" y="98" text-anchor="middle" font-size="11" class="m">optional</text>
+      <path d="M640 114 V225" fill="none" stroke="var(--up)" stroke-width="3" stroke-dasharray="7 6" stroke-linecap="round"/>
+      <text x="652" y="175" font-size="11" class="m">Uplink</text>
+
+      <!-- Switch -->
+      <rect class="hl" x="580" y="225" width="120" height="80" rx="10"/>
+      <text x="640" y="258" text-anchor="middle" font-size="16" font-weight="700">Switch</text>
+      <text x="640" y="278" text-anchor="middle" font-size="12" class="m">5+ ports, 10GbE</text>
+      <text x="640" y="296" text-anchor="middle" font-size="11" class="m">unmanaged OK</text>
+
+      <!-- Switch to studios -->
+      <g fill="none" stroke="var(--eth)" stroke-width="4" stroke-linecap="round">
+        <path d="M700 255 H750 V180 H800"/>
+        <path d="M700 275 H750 V400 H800"/>
+      </g>
+      <text x="750" y="170" text-anchor="middle" font-size="11" class="m">10GbE</text>
+      <text x="750" y="420" text-anchor="middle" font-size="11" class="m">10GbE</text>
+
+      <!-- Studio A -->
+      <rect class="hl" x="800" y="105" width="190" height="150" rx="12"/>
+      <text x="895" y="133" text-anchor="middle" font-size="16" font-weight="700">Mac Studio A</text>
+      <text x="895" y="152" text-anchor="middle" font-size="12" class="m">M5 Ultra · 256 GB · 1 TB</text>
+      <text x="895" y="182" text-anchor="middle" font-size="12">Qwen   :8001</text>
+      <text x="895" y="202" text-anchor="middle" font-size="12">Gemma  :8002</text>
+      <text x="895" y="230" text-anchor="middle" font-size="12" class="m">10.0.0.21 · headless</text>
+
+      <!-- Studio B -->
+      <rect class="hl" x="800" y="325" width="190" height="150" rx="12"/>
+      <text x="895" y="353" text-anchor="middle" font-size="16" font-weight="700">Mac Studio B</text>
+      <text x="895" y="372" text-anchor="middle" font-size="12" class="m">M5 Ultra · 256 GB · 1 TB</text>
+      <text x="895" y="402" text-anchor="middle" font-size="12">Qwen   :8001</text>
+      <text x="895" y="422" text-anchor="middle" font-size="12">Gemma  :8002</text>
+      <text x="895" y="450" text-anchor="middle" font-size="12" class="m">10.0.0.22 · headless</text>
+
+      <text x="500" y="520" text-anchor="middle" font-size="12" class="m">The two Studios are not wired to each other. Each one only talks to the switch, and the Mac mini picks the free one.</text>
+    </svg>
+    </div>
+  </div>
+
+  <h2>2. Cable list</h2>
+  <div class="card scroll">
+    <table>
+      <thead><tr><th>#</th><th>From</th><th>To</th><th>Type</th><th>Cable</th></tr></thead>
+      <tbody>
+        <tr><td class="n">1</td><td>Mac mini Ethernet</td><td>Switch port 1</td><td><span class="tag t-eth">Ethernet</span></td><td>Cat6a, short patch</td></tr>
+        <tr><td class="n">2</td><td>Mac Studio A Ethernet</td><td>Switch port 2</td><td><span class="tag t-eth">Ethernet</span></td><td>Cat6a</td></tr>
+        <tr><td class="n">3</td><td>Mac Studio B Ethernet</td><td>Switch port 3</td><td><span class="tag t-eth">Ethernet</span></td><td>Cat6a</td></tr>
+        <tr><td class="n">4</td><td>Router / internet</td><td>Switch port 4 (uplink)</td><td><span class="tag t-up">Ethernet</span></td><td>Cat6 or Cat6a</td></tr>
+        <tr><td class="n">5</td><td>Mac mini HDMI</td><td>Display 1</td><td><span class="tag t-disp">Display</span></td><td>HDMI 2.1</td></tr>
+        <tr><td class="n">6</td><td>Mac mini Thunderbolt 5 port 1</td><td>Display 2</td><td><span class="tag t-disp">Display</span></td><td>USB-C to DisplayPort or USB-C to USB-C</td></tr>
+        <tr><td class="n">7</td><td>Mac mini Thunderbolt 5 port 2</td><td>Display 3</td><td><span class="tag t-disp">Display</span></td><td>USB-C to DisplayPort or USB-C to USB-C</td></tr>
+        <tr><td class="n">8</td><td>Mac mini Thunderbolt 5 port 3</td><td>External NVMe SSD (optional)</td><td><span class="tag t-disp">Data</span></td><td>Thunderbolt 5 cable</td></tr>
+      </tbody>
+    </table>
+    <div class="note">Why the displays sit on the Mac mini: it is the machine you actually sit at, and its HDMI port plus Thunderbolt ports can drive three screens. The Studios run headless and you manage them over the network (SSH or Screen Sharing). Plug a spare monitor into a Studio only for first-time setup.</div>
+  </div>
+
+  <h2>3. Power layout</h2>
+  <div class="card">
+    <div class="legend"><span><i style="border-color:var(--pwr)"></i>230 V AC power</span></div>
+    <div class="scroll">
+    <svg viewBox="0 0 1000 330" role="img" aria-label="Power distribution diagram">
+      <rect class="hl" x="20" y="125" width="150" height="80" rx="10"/>
+      <text x="95" y="157" text-anchor="middle" font-size="15" font-weight="700">Wall socket</text>
+      <text x="95" y="177" text-anchor="middle" font-size="11" class="m">dedicated circuit</text>
+
+      <rect class="hl" x="250" y="125" width="170" height="80" rx="10"/>
+      <text x="335" y="157" text-anchor="middle" font-size="15" font-weight="700">Online UPS</text>
+      <text x="335" y="177" text-anchor="middle" font-size="11" class="m">2 to 3 kVA</text>
+
+      <rect class="hl" x="500" y="125" width="130" height="80" rx="10"/>
+      <text x="565" y="157" text-anchor="middle" font-size="15" font-weight="700">PDU strip</text>
+      <text x="565" y="177" text-anchor="middle" font-size="11" class="m">8+ outlets, surge</text>
+
+      <g fill="none" stroke="var(--pwr)" stroke-width="3.5" stroke-linecap="round">
+        <path d="M170 165 H250"/>
+        <path d="M420 165 H500"/>
+        <path d="M630 165 H690 V30 H760"/>
+        <path d="M630 165 H690 V90 H760"/>
+        <path d="M630 165 H690 V150 H760"/>
+        <path d="M630 165 H690 V210 H760"/>
+        <path d="M630 165 H690 V270 H760"/>
+        <path d="M630 165 H690 V315 H760"/>
+      </g>
+      <g font-size="13">
+        <rect class="box" x="760" y="10" width="220" height="40" rx="8"/><text x="870" y="35" text-anchor="middle">Mac Studio A</text>
+        <rect class="box" x="760" y="70" width="220" height="40" rx="8"/><text x="870" y="95" text-anchor="middle">Mac Studio B</text>
+        <rect class="box" x="760" y="130" width="220" height="40" rx="8"/><text x="870" y="155" text-anchor="middle">Mac mini</text>
+        <rect class="box" x="760" y="190" width="220" height="40" rx="8"/><text x="870" y="215" text-anchor="middle">Network switch</text>
+        <rect class="box" x="760" y="250" width="220" height="40" rx="8"/><text x="870" y="275" text-anchor="middle">Displays 1 to 3 (own adapters)</text>
+        <rect class="box" x="760" y="296" width="220" height="30" rx="8"/><text x="870" y="316" text-anchor="middle" font-size="12" class="m">Router / external SSD</text>
+      </g>
+    </svg>
+    </div>
+
+    <table style="margin-top:14px">
+      <thead><tr><th>Device</th><th>Qty</th><th>Typical under load</th><th>Peak (plan for this)</th></tr></thead>
+      <tbody>
+        <tr><td>Mac Studio M5 Ultra</td><td class="n">2</td><td class="n">200 to 300 W each</td><td class="n">~480 W each</td></tr>
+        <tr><td>Mac mini Pro</td><td class="n">1</td><td class="n">30 to 60 W</td><td class="n">~140 W</td></tr>
+        <tr><td>10GbE switch</td><td class="n">1</td><td class="n">15 to 30 W</td><td class="n">~40 W</td></tr>
+        <tr><td>Displays (27 inch class)</td><td class="n">3</td><td class="n">25 to 45 W each</td><td class="n">~60 W each</td></tr>
+        <tr><td>Router, SSD, misc.</td><td class="n">1 set</td><td class="n">15 W</td><td class="n">~30 W</td></tr>
+        <tr class="total"><td>Total</td><td></td><td class="n">~650 to 950 W</td><td class="n">~1,400 W</td></tr>
+      </tbody>
+    </table>
+    <div class="note">These are planning estimates, not measured values. Check the exact power figures on Apple's tech specs page for the M5 Ultra Mac Studio and your Mac mini, and the label on your displays and switch. Sizing: a 1.4 kW peak load fits comfortably on a 16 A / 230 V circuit. For the UPS, an online (double-conversion) unit of 2 kVA or more gives you headroom and a few minutes of runtime to shut down cleanly.</div>
+  </div>
+
+  <h2>4. Things to confirm before buying</h2>
+  <div class="grid">
+    <div class="card"><b>Mac mini model</b><ul><li>You mentioned a "Mac mini Pro" and a "Mac mini Ultra". As far as I know there is only one Mac mini in this plan, with Pro-class chip, so I drew one.</li><li>If you really have two minis, the second can be a standby load balancer on switch port 5.</li></ul></div>
+    <div class="card"><b>10GbE on the mini</b><ul><li>The Mac mini's 10 Gigabit Ethernet is a configure-to-order option. If yours is 1GbE, the switch link will cap at 1 Gbit/s, which is still fine for prompts but slower for moving data.</li></ul></div>
+    <div class="card"><b>Switch ports</b><ul><li>Need at least 4 ports (mini, 2 Studios, uplink). Get 6 to 8 for growth.</li><li>10GbE on every port is ideal, but 2.5GbE is enough for text-based LLM traffic.</li></ul></div>
+    <div class="card"><b>Storage</b><ul><li>1 TB per Studio will fill quickly with model weights. Keep sessions and data on the mini (add an external NVMe) and use the Studios only for models.</li></ul></div>
+  </div>
+
+  <h2>5. Request flow</h2>
+  <div class="card">
+    <ol style="margin:0;padding-left:20px">
+      <li>A user or app sends a prompt to the Mac mini at <code>10.0.0.10:8000</code>.</li>
+      <li>The load balancer on the mini checks which Studio (and which model, Qwen or Gemma) is free.</li>
+      <li>It forwards the prompt over the switch to <code>10.0.0.21</code> or <code>10.0.0.22</code> on port 8001 (Qwen) or 8002 (Gemma).</li>
+      <li>The answer returns the same way, and the mini saves the session and data.</li>
+    </ol>
+  </div>
+</div>
+</body>
+</html>
